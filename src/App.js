@@ -1,24 +1,35 @@
-import logo from './logo.svg';
 import './App.css';
-
+import { Form } from './components/Form';
+import { ContactContext } from './Context/ContactContext';
+import { Contacts } from './components/Contacts.jsx'
+import { AppBar, Typography, Box } from '@mui/material'
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <ContactContext>
+        <AppBar
+          position='static'
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <Typography variant="h6" component='h6' textAlign={'center'}>
+            Contact Management
+          </Typography>
+        </AppBar>
+        <Box
+          display={'flex'}
+          flexDirection='column'
+          justifyContent={'center'}
+          alignItems={'center'}
+          padding='30px'
+        >
+
+          <Box>
+            <Form />
+            <Contacts />
+          </Box>
+          
+        </Box>
+      </ContactContext>
+    </>
   );
 }
 
