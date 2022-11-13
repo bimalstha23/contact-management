@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react'
 import { Button, Accordion, AccordionSummary, AccordionDetails, Snackbar, Slide, Dialog, DialogActions, DialogContentText, DialogTitle, DialogContent, Alert } from '@mui/material';
 import { useFormik } from 'formik';
@@ -26,9 +27,13 @@ export const Contact = (props) => {
     const inputRef = useRef(null);
     const [opendialog, setOpendialog] = useState(false);
     const [snackbaropen, setSnackbaropen] = useState(false);
+    const [savesnackbar, setSaveSnackbar] = useState(false);
+
     const handleClose = () => {
+        setSaveSnackbar(false);
         setSnackbaropen(false);
     }
+
     const handleDialogClose = () => {
         setOpendialog(false);
     }
@@ -55,6 +60,7 @@ export const Contact = (props) => {
         })
         localStorage.setItem('contacts', JSON.stringify(newContactlist));
         setContacts(newContactlist);
+        setSaveSnackbar(true);
     }
 
     const handleClick = () => {
@@ -64,16 +70,18 @@ export const Contact = (props) => {
     }
 
     const handleDelete = () => {
+        handleDialogClose();
+        
         const newContactlist = contacts.filter((el) => {
             return el.id !== contact.id;
         })
+
         localStorage.setItem('contacts', JSON.stringify(newContactlist));
         setContacts(newContactlist);
-        handleDialogClose();
         setSnackbaropen(true);
     }
-    return (
 
+    return(
         <div className='contactlist'>
             <form action="" onSubmit={
                 (e) => {
@@ -95,11 +103,12 @@ export const Contact = (props) => {
                                 ) : (<Button onClick={() => { setEditClicked(false); setReadonly(true); formik.handleSubmit() }}>Save</Button>)}
                             <Button onClick={() => { setOpendialog(true); }}>Delete</Button>
                         </div>
-                        
-                        {formik.errors.name && (
-                            <span>{formik.errors.name}</span>
-                        )}
+
+
                     </AccordionSummary>
+                    {formik.errors.name && (
+                        <span>{formik.errors.name}</span>
+                    )}
                     <AccordionDetails>
                         <div className="contacts">
                             <input name='email' readOnly={readonly} onChange={formik.handleChange} type={'email'} value={formik.values.email} />
@@ -123,11 +132,15 @@ export const Contact = (props) => {
                 </Alert>
             </Snackbar>
 
+            <Snackbar open={savesnackbar} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+                    Contact Saved Successfully!
+                </Alert>
+            </Snackbar>
 
             <Dialog
                 open={opendialog}
                 TransitionComponent={Transition}
-                // keepMounted
                 onClose={handleDialogClose}
                 aria-describedby="alert-dialog-slide-description"
             >
@@ -139,11 +152,7 @@ export const Contact = (props) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose}>NO</Button>
-                    <Button onClick={() => {
-                        handleDelete();
-                        // setSnackbaropen(true);
-                    }
-                    } >YES</Button>
+                    <Button onClick={handleDelete}>YES</Button>
                 </DialogActions>
             </Dialog>
 
