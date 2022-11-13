@@ -33,7 +33,7 @@ export const Form = () => {
                 <TextField margin='dense' name='name' id="outlined-basic" onChange={formik.handleChange} value={formik.values.name} label="NAME" variant="outlined" type={'string'} fullWidth />
                 <TextField margin='dense' name='email' id="outlined-basic" onChange={formik.handleChange} value={formik.values.email} label="EMAIL" variant="outlined" type={'email'} fullWidth />
                 <TextField margin='dense' name='number' id="outlined-basic" onChange={formik.handleChange} label="PHONE" value={formik.values.number} variant="outlined" type={'number'} fullWidth />
-                <Button type='submit' variant="contained" size='large'>Submit</Button>
+                <Button fullWidth type='submit' variant="contained" size='large'>Submit</Button>
             </form>
         </div>
     )

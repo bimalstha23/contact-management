@@ -1,14 +1,30 @@
-import React, { useState } from 'react'
-import { Button } from '@mui/material';
+import React, { useRef, useState } from 'react'
+import { Button, Accordion, AccordionSummary, AccordionDetails, Snackbar, Slide, Dialog, DialogActions, DialogContentText, DialogTitle, DialogContent, Alert } from '@mui/material';
 import { useFormik } from 'formik';
 import { useContact } from '../Context/ContactContext';
 import './contact.css'
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
+
+
+
 export const Contact = (props) => {
 
     const { contact, index } = props;
     const { setContacts, contacts } = useContact();
     const [editClicked, setEditClicked] = useState(false);
     const [readonly, setReadonly] = useState(true);
+    const inputRef = useRef(null);
+    const [opendialog, setOpendialog] = useState(false);
+    const [snackbaropen, setSnackbaropen] = useState(false);
+    const handleClose = () => {
+        setSnackbaropen(false);
+    }
+    const handleDialogClose = () => {
+        setOpendialog(false);
+    }
 
     const formik = useFormik({
         initialValues: {
@@ -18,21 +34,17 @@ export const Contact = (props) => {
         },
         enableReinitialize: true,
         onSubmit: values => {
-            console.log('hello values', values);
             handleSave(values);
         }
     })
-    console.log('from contact', formik.values.name);
 
     const handleSave = (values) => {
-        console.log(values);
         const newContactlist = contacts.map((oldcontact, key) => {
             if (index === key) {
                 return { ...oldcontact, name: values.name, email: values.email, number: values.number }
             }
             return oldcontact;
         })
-        console.log('hello new ', newContactlist);
         localStorage.setItem('contacts', JSON.stringify(newContactlist));
         setContacts(newContactlist);
     }
@@ -40,43 +52,83 @@ export const Contact = (props) => {
     const handleClick = () => {
         setEditClicked(true);
         setReadonly(false);
+        inputRef.current.focus();
     }
 
     const handleDelete = () => {
         const newContactlist = contacts.filter((el) => {
-            if (el.id !== contact.id) {
-                return el;
-            }
+            return el.id !== contact.id;
         })
         localStorage.setItem('contacts', JSON.stringify(newContactlist));
         setContacts(newContactlist);
+        handleDialogClose();
+        setSnackbaropen(true);
     }
-    console.log(contacts);
-
     return (
+
         <div className='contactlist'>
             <form action="" onSubmit={
                 (e) => {
                     e.preventDefault()
-                    // formik.handleSubmit()
                 }
             }>
-                <div className="actions">
-                    {
-                        !editClicked ? (
-                            <Button onClick={handleClick}>Edit</Button>
-                        ) : (<Button onClick={() => { setEditClicked(false); setReadonly(true); formik.handleSubmit() }}>Save</Button>)}
-                    <Button onClick={handleDelete}>Delete</Button>
+                <Accordion
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                    width="100%"
+                    
+                >
+                    <AccordionSummary>
+                        <input ref={inputRef} name='name' readOnly={readonly} onChange={formik.handleChange} label="NAME" type={'string'} value={formik.values.name} />
+                        <div className="actions">
+                            {
+                                !editClicked ? (
+                                    <Button onClick={handleClick}>Edit</Button>
+                                ) : (<Button onClick={() => { setEditClicked(false); setReadonly(true); formik.handleSubmit() }}>Save</Button>)}
+                            <Button onClick={() => { setOpendialog(true); }}>Delete</Button>
 
-                </div>
-                <div className="contacts">
-                    <input name='name' readOnly={readonly} onChange={formik.handleChange} label="NAME" type={'string'} value={formik.values.name} />
+                        </div>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <div className="contacts">
 
-                    <input name='email' readOnly={readonly} onChange={formik.handleChange} type={'email'} value={formik.values.email} />
-
-                    <input name='number' readOnly={readonly} onChange={formik.handleChange} type={'number'} value={formik.values.number} />
-                </div>
+                            <input name='email' readOnly={readonly} onChange={formik.handleChange} type={'email'} value={formik.values.email} />
+                            <input name='number' readOnly={readonly} onChange={formik.handleChange} type={'number'} value={formik.values.number} />
+                        </div>
+                    </AccordionDetails>
+                </Accordion>
             </form>
-        </div>
+
+            <Snackbar open={snackbaropen} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+                    Contact Deleted Successfully!
+                </Alert>
+            </Snackbar>
+
+
+            <Dialog
+                open={opendialog}
+                TransitionComponent={Transition}
+                // keepMounted
+                onClose={handleDialogClose}
+                aria-describedby="alert-dialog-slide-description"
+            >
+                <DialogTitle>{"Are you Sure You want to Delete this Contact?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-slide-description">
+                        This action cannot be undone
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>NO</Button>
+                    <Button onClick={() => {
+                        handleDelete();
+                        // setSnackbaropen(true);
+                    }
+                    } >YES</Button>
+                </DialogActions>
+            </Dialog>
+
+        </div >
     )
 }
