@@ -2,15 +2,24 @@ import React from 'react'
 import { TextField, Button } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContact } from '../Context/ContactContext'
+import * as yup from 'yup';
 
 export const Form = () => {
     const { addContact } = useContact();
+
+    const validate = yup.object().shape({
+        name: yup.string().required().max(20).min(2),
+        email: yup.string().email().required(),
+        number: yup.string().required().min(10).max(10)
+    })
+
     const formik = useFormik({
         initialValues: {
             name: '',
             email: '',
             number: ''
         },
+        validationSchema: validate,
         onSubmit: values => {
             console.log(values);
             const contact = {
@@ -30,9 +39,9 @@ export const Form = () => {
                 e.preventDefault()
                 formik.handleSubmit();
             }}>
-                <TextField margin='dense' name='name' id="outlined-basic" onChange={formik.handleChange} value={formik.values.name} label="NAME" variant="outlined" type={'string'} fullWidth />
-                <TextField margin='dense' name='email' id="outlined-basic" onChange={formik.handleChange} value={formik.values.email} label="EMAIL" variant="outlined" type={'email'} fullWidth />
-                <TextField margin='dense' name='number' id="outlined-basic" onChange={formik.handleChange} label="PHONE" value={formik.values.number} variant="outlined" type={'number'} fullWidth />
+                <TextField error={formik.errors.name} helperText={formik.errors.name} margin='dense' name='name' id="outlined-basic" onChange={formik.handleChange} value={formik.values.name} label="NAME" variant="outlined" type={'string'} fullWidth />
+                <TextField error={formik.errors.number} helperText={formik.errors.number} margin='dense' name='number' id="outlined-basic" onChange={formik.handleChange} label="PHONE" value={formik.values.number} variant="outlined" type={'number'} fullWidth />
+                <TextField error={formik.errors.email} helperText={formik.errors.email} margin='dense' name='email' id="outlined-basic" onChange={formik.handleChange} value={formik.values.email} label="EMAIL" variant="outlined" type={'email'} fullWidth />
                 <Button fullWidth type='submit' variant="contained" size='large'>Submit</Button>
             </form>
         </div>

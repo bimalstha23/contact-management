@@ -3,6 +3,7 @@ import { Button, Accordion, AccordionSummary, AccordionDetails, Snackbar, Slide,
 import { useFormik } from 'formik';
 import { useContact } from '../Context/ContactContext';
 import './contact.css'
+import * as yup from 'yup';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -11,6 +12,12 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 
 export const Contact = (props) => {
+
+    const validate = yup.object().shape({
+        name: yup.string().required().max(20).min(2),
+        email: yup.string().email().required(),
+        number: yup.string().required().min(10).max(10)
+    })
 
     const { contact, index } = props;
     const { setContacts, contacts } = useContact();
@@ -32,6 +39,7 @@ export const Contact = (props) => {
             email: contact ? contact.email : '',
             number: contact ? contact.number : '',
         },
+        validationSchema: validate,
         enableReinitialize: true,
         onSubmit: values => {
             handleSave(values);
@@ -76,7 +84,7 @@ export const Contact = (props) => {
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                     width="100%"
-                    
+
                 >
                     <AccordionSummary>
                         <input ref={inputRef} name='name' readOnly={readonly} onChange={formik.handleChange} label="NAME" type={'string'} value={formik.values.name} />
@@ -86,14 +94,24 @@ export const Contact = (props) => {
                                     <Button onClick={handleClick}>Edit</Button>
                                 ) : (<Button onClick={() => { setEditClicked(false); setReadonly(true); formik.handleSubmit() }}>Save</Button>)}
                             <Button onClick={() => { setOpendialog(true); }}>Delete</Button>
-
                         </div>
+                        
+                        {formik.errors.name && (
+                            <span>{formik.errors.name}</span>
+                        )}
                     </AccordionSummary>
                     <AccordionDetails>
                         <div className="contacts">
-
                             <input name='email' readOnly={readonly} onChange={formik.handleChange} type={'email'} value={formik.values.email} />
+                            {formik.errors.email && (
+                                <span>{formik.errors.email}</span>
+                            )
+                            }
                             <input name='number' readOnly={readonly} onChange={formik.handleChange} type={'number'} value={formik.values.number} />
+                            {formik.errors.number && (
+                                <span>{formik.errors.number}</span>
+                            )
+                            }
                         </div>
                     </AccordionDetails>
                 </Accordion>
